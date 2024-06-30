@@ -1,16 +1,14 @@
 # safe_chat
 
-A new Flutter project.
+- 考完试狂肝两天，完成该项目😋
+---
+**一款加密消息聊天程序，保障安全**
 
-## Getting Started
+![](./introduce.png)
 
-This project is a starting point for a Flutter application.
+## 使用教程🔎
+客户端：下载release打开即可
+服务器：服务器端代码在server文件夹下，运行server.py即可
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 注意事项🧨
+**AES密钥必须为16位整数，输入$代表随机生成**
