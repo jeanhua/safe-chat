@@ -4,12 +4,12 @@ import 'package:flutter/services.dart';
 import 'chat.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,12 +17,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: LoginPage(),
+      home: const LoginPage(),
     );
   }
 }
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -50,6 +52,9 @@ class _LoginPageState extends State<LoginPage> {
   void _login() {
     if (_passwordController.text == '\$') {
       _passwordController.text = getRandomString(16);
+    }
+    if (_usernameController.text == '服务器') {
+      _usernameController.text = '服务器(user)';
     }
     print('ip:port: ${_ipController.text}');
     print('Username: ${_usernameController.text}');
@@ -126,7 +131,6 @@ class _LoginPageState extends State<LoginPage> {
     String text = _ipController.text;
     RegExp regex = RegExp(r'(\d+\.\d+\.\d+\.\d+):(\d+)');
     Match? match = regex.firstMatch(text);
-    bool isSuccess = false;
     if (match != null) {
       String ip = match.group(1)!;
       String port = match.group(2)!;
@@ -134,12 +138,12 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.of(context).pushAndRemoveUntil(
           new MaterialPageRoute(
               builder: (context) => new ChatPage(pushData: {
-                'ip': ip,
-                'port': port,
-                'nickname': _usernameController.text,
-                'AES_key': _passwordController.text,
-              })),
-              (route) => route == null);
+                    'ip': ip,
+                    'port': port,
+                    'nickname': _usernameController.text,
+                    'AES_key': _passwordController.text,
+                  })),
+          (route) => route == null);
     } else {
       showDialog(
         context: context,
@@ -162,7 +166,6 @@ class _LoginPageState extends State<LoginPage> {
         },
       );
     }
-    print('跳转完成');
   }
 
   @override
@@ -227,7 +230,7 @@ class _LoginPageState extends State<LoginPage> {
                     constraints: BoxConstraints.tightFor(width: 300),
                     hintStyle: TextStyle(color: Colors.white), // 修改提示文字颜色
                   ),
-                  style: TextStyle(color: Colors.white), // 修改输入文字颜色
+                  style: const TextStyle(color: Colors.white), // 修改输入文字颜色
                   maxLength: 10, // 设置最大长度为10个字符
                   maxLengthEnforcement: MaxLengthEnforcement.enforced, // 强制限制长度
                 ),
@@ -241,7 +244,7 @@ class _LoginPageState extends State<LoginPage> {
                     constraints: BoxConstraints.tightFor(width: 300),
                     hintStyle: TextStyle(color: Colors.white), // 修改提示文字颜色
                   ),
-                  style: TextStyle(color: Colors.white), // 修改输入文字颜色
+                  style: const TextStyle(color: Colors.white), // 修改输入文字颜色
                   keyboardType: TextInputType.number,
                   maxLength: 16, // 设置最大长度为16个字符
                   maxLengthEnforcement: MaxLengthEnforcement.enforced, // 强制限制长度
@@ -252,8 +255,10 @@ class _LoginPageState extends State<LoginPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue.shade800, // 修改按钮背景颜色
                   ),
-                  child: const Text('Connect',
-                    style: TextStyle(fontSize: 30, color: Colors.white), // 修改按钮文字颜色
+                  child: const Text(
+                    'Connect',
+                    style: TextStyle(
+                        fontSize: 30, color: Colors.white), // 修改按钮文字颜色
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -276,6 +281,4 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-
-
 }

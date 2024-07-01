@@ -1,16 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'dart:io';
 
 import 'package:safe_chat/encryption.dart';
 
 class ChatPage extends StatefulWidget {
-  ChatPage({super.key, required this.pushData});
-  Map pushData;
+  const ChatPage({super.key, required this.pushData});
+  final Map pushData;
   @override
   _ChatPageState createState() => _ChatPageState(pushData: pushData);
 }
@@ -30,16 +28,21 @@ class _ChatPageState extends State<ChatPage> {
     if (_textEditingController.text.isNotEmpty) {
       // 向服务器发送消息
       if (isConnect && pushData['socket'] != null) {
-        // setState(() {
-        //   _messages.add(pushData['nickname']+'\$split\$'+_textEditingController.text);
-        // });
-        String message =
-            '${pushData['nickname']}\$split\$${_textEditingController.text}';
+        String message;
+        if (_textEditingController.text == '\$getAll') {
+          setState(() {
+            _messages.clear();
+          });
+          message = _textEditingController.text;
+        } else {
+          message =
+              '${pushData['nickname']}\$split\$${_textEditingController.text}';
+        }
+
         String encodeStr = AESEncryptUtil.encryptAes(
             plainText: message,
             keyStr: pushData['AES_key'],
             ivStr: pushData['AES_key']);
-        print('发送加密串:$encodeStr');
         pushData['socket'].write(encodeStr);
         _textEditingController.clear();
         _scrollToBottom();
@@ -80,10 +83,6 @@ class _ChatPageState extends State<ChatPage> {
         (data) async {
           current(socket, data);
         },
-        // handle errors
-        onError: (error) {
-          print(error);
-        },
         // handle socket being closed
         onDone: () {
           isConnect = false;
@@ -121,7 +120,6 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> datagen1(socket, data) async {
-    print('收到服务器的消息');
     String text = String.fromCharCodes(data);
     List<String> splitText = text.split(":");
     if (splitText.length > 1) {
@@ -139,12 +137,10 @@ class _ChatPageState extends State<ChatPage> {
 
   void datagen2(socket, data) {
     setState(() {
-      print('收到消息 ${utf8.decode(data)}');
       String rcvData = AESEncryptUtil.decryptAes(
           encryptedStr: utf8.decode(data),
           keyStr: pushData['AES_key'],
           ivStr: pushData['AES_key']);
-      print('$rcvData');
       _messages.add(rcvData);
       _scrollToBottom();
     });
@@ -159,7 +155,10 @@ class _ChatPageState extends State<ChatPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat Connect',style: TextStyle(color: Colors.black54),),
+        title: const Text(
+          'Chat Connect',
+          style: TextStyle(color: Colors.black54),
+        ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -173,7 +172,7 @@ class _ChatPageState extends State<ChatPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.grey,Colors.white38],
+            colors: [Colors.grey, Colors.white38],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -191,10 +190,10 @@ class _ChatPageState extends State<ChatPage> {
                         children: <TextSpan>[
                           TextSpan(
                             text: '${_messages[index].split('\$split\$')[0]}：',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 24.0,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue,
+                              color:_messages[index].split('\$split\$')[0]==pushData['nickname']?Colors.black :(_messages[index].split('\$split\$')[0]=='服务器'?Colors.red:Colors.blue),
                               letterSpacing: 1.2,
                               fontStyle: FontStyle.normal,
                               decoration: TextDecoration.underline,
@@ -221,7 +220,7 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Colors.grey, Colors.white30],
@@ -238,7 +237,6 @@ class _ChatPageState extends State<ChatPage> {
                       decoration: const InputDecoration(
                         hintText: 'Type a message',
                         border: OutlineInputBorder(),
-
                       ),
                       onSubmitted: (value) {
                         _sendMessage();
@@ -257,5 +255,4 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
-
 }
