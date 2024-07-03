@@ -33,11 +33,9 @@ class _ChatPageState extends State<ChatPage> {
           setState(() {
             _messages.clear();
           });
-          message = _textEditingController.text;
-        } else {
-          message =
-              '${pushData['nickname']}\$split\$${_textEditingController.text}';
         }
+        message =
+            '${pushData['nickname']}\$split\$${_textEditingController.text}';
 
         String encodeStr = AESEncryptUtil.encryptAes(
             plainText: message,
@@ -193,7 +191,13 @@ class _ChatPageState extends State<ChatPage> {
                             style: TextStyle(
                               fontSize: 24.0,
                               fontWeight: FontWeight.bold,
-                              color:_messages[index].split('\$split\$')[0]==pushData['nickname']?Colors.black :(_messages[index].split('\$split\$')[0]=='服务器'?Colors.red:Colors.blue),
+                              color: _messages[index].split('\$split\$')[0] ==
+                                      pushData['nickname']
+                                  ? Colors.black
+                                  : (_messages[index].split('\$split\$')[0] ==
+                                          '服务器'
+                                      ? Colors.red
+                                      : Colors.blue),
                               letterSpacing: 1.2,
                               fontStyle: FontStyle.normal,
                               decoration: TextDecoration.underline,
@@ -220,7 +224,8 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Colors.grey, Colors.white30],

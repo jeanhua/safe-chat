@@ -2,9 +2,8 @@ import base64
 import socket
 import threading
 import time
-
-import requests
 import encryption
+import m_constant
 
 SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 8888
@@ -15,7 +14,7 @@ client_sk = []
 client_addr = []
 client_key = {}
 message_stack = []
-message_history = '服务器$split$历史消息---------\n'
+message_history = '服务器'+m_constant.split_flag+'历史消息---------\n'
 
 
 def handle_client(client_socket, address):
@@ -50,7 +49,7 @@ def handle_client(client_socket, address):
             client_sk.append(client_socket)
             client_addr.append(address)
             client_socket.sendall(
-                encryption.AESEncryptUtil.encrypt_aes('服务器$split$你已成功连接服务器😋，支持指令：$getAll 同步历史消息',
+                encryption.AESEncryptUtil.encrypt_aes(m_constant.server_command_text,
                                                       client_key[str(address)], client_key[str(address)]).encode())
         else:
             decodeText = encryption.AESEncryptUtil.decrypt_aes(encrypted_str=data.decode(),
@@ -58,12 +57,12 @@ def handle_client(client_socket, address):
                                                                iv_str=str(client_key[str(address)]).encode(
                                                                    encoding='utf-8').decode())
             # 指令判断区域
-            if decodeText == '$getAll':
+            if decodeText.split(m_constant.split_flag)[1] == '$getAll':
                 encrypted_message = encryption.AESEncryptUtil.encrypt_aes(message_history, client_key[str(address)],
                                                                           client_key[str(address)])
                 client_socket.sendall(encrypted_message.encode())
             else:
-                splitText = decodeText.split('$split$', 1)
+                splitText = decodeText.split(m_constant.split_flag, 1)
                 if len(splitText) > 1:
                     message_history = message_history + splitText[0] + ':' + splitText[1] + '\n'
                 else:
@@ -77,7 +76,7 @@ def handle_client(client_socket, address):
             del client_key[str(client_addr[i])]
             del client_addr[i]
 
-    message_stack.append('服务器$split$' + str(address) + '离开')
+    message_stack.append('服务器'+m_constant.split_flag + str(address) + '离开')
     client_socket.close()
 
 
@@ -106,7 +105,7 @@ def run_server():
     server_socket.listen(100)
     sendThread = threading.Thread(target=server_send, args=())
     sendThread.start()
-
+    print('启动完成')
     while True:
         client_socket, address = server_socket.accept()
         client_thread = threading.Thread(target=handle_client, args=(client_socket, address))
@@ -117,6 +116,4 @@ if __name__ == "__main__":
     print('正在生成密钥……')
     prikey, pubkey = encryption.generateRSAkey()
     print('生成完成,正在启动服务器')
-    res = requests.get('https://myip.ipip.net').text
-    print('服务器', res, '开放端口', SERVER_PORT)
     run_server()
