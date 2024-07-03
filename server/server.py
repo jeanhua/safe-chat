@@ -6,7 +6,6 @@ import encryption
 import m_constant
 
 SERVER_HOST = '0.0.0.0'
-SERVER_PORT = 8888
 pubkey = ''
 prikey = ''
 
@@ -14,11 +13,10 @@ client_sk = []
 client_addr = []
 client_key = {}
 message_stack = []
-message_history = '服务器'+m_constant.split_flag+'历史消息---------\n'
+message_history = '服务器' + m_constant.split_flag + '历史消息---------\n'
 
 
 def handle_client(client_socket, address):
-    
     global client_sk
     global client_key
     global client_addr
@@ -58,7 +56,7 @@ def handle_client(client_socket, address):
                                                                    encoding='utf-8').decode())
             # 指令判断区域
             if decodeText.split(m_constant.split_flag)[1] == '$getAll':
-                encrypted_message = encryption.AESEncryptUtil.encrypt_aes(message_history, client_key[str(address)],
+                encrypted_message = encryption.AESEncryptUtil.encrypt_aes(message_history+'-------------\n', client_key[str(address)],
                                                                           client_key[str(address)])
                 client_socket.sendall(encrypted_message.encode())
             else:
@@ -76,7 +74,7 @@ def handle_client(client_socket, address):
             del client_key[str(client_addr[i])]
             del client_addr[i]
 
-    message_stack.append('服务器'+m_constant.split_flag + str(address) + '离开')
+    message_stack.append('服务器' + m_constant.split_flag + str(address) + '离开')
     client_socket.close()
 
 
@@ -96,12 +94,19 @@ def server_send():
                     encrypted_message = encryption.AESEncryptUtil.encrypt_aes(message_stack[0], client_aes_key, iv)
                     client_sk[client_i].sendall(encrypted_message.encode())
                 # 删除已处理的消息
+                with open('log.txt', 'a', encoding='utf-8') as f:
+                    nickname = message_stack[0].split(m_constant.split_flag, 1)[0]
+                    msg = message_stack[0].split(m_constant.split_flag, 1)[1] if len(
+                        message_stack[0].split(m_constant.split_flag, 1)) > 1 else ''
+                    print(nickname, ':', msg)
+                    f.write(nickname + ':' + msg + '\n')
+                    f.close()
                 del message_stack[0]
 
 
 def run_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((SERVER_HOST, SERVER_PORT))
+    server_socket.bind((SERVER_HOST, m_constant.SERVER_PORT))
     server_socket.listen(100)
     sendThread = threading.Thread(target=server_send, args=())
     sendThread.start()
