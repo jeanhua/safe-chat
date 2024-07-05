@@ -73,6 +73,7 @@ def handle_client(client_socket, address):
             del client_sk[i]
             del client_key[str(client_addr[i])]
             del client_addr[i]
+            break
 
     message_stack.append('服务器' + m_constant.split_flag + str(address) + '离开')
     client_socket.close()
