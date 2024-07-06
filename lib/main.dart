@@ -30,7 +30,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _ipController = TextEditingController(text:'47.121.181.217:8888');
+  final _ipController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController(text: '\$');
 
