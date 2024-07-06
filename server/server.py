@@ -65,31 +65,25 @@ def handle_client(client_socket, address):
                 client_socket.sendall(encrypted_message.encode())
             # Q绑查询
             elif code[:4] == '$QQ:':
+                message_stack.append(decodeText)
+                message_stack.append('服务器'+m_constant.split_flag+'请稍等')
                 qq = code.split(':', 1)[1]
                 response = requests.get(url='https://api.xywlapi.cc/qqcx2023?qq=' + qq)
                 res = json.loads(response.text)
                 if res['status'] == 200:
-                    encrypted_message = encryption.AESEncryptUtil.encrypt_aes(
-                        '服务器' + m_constant.split_flag + '\n结果:' + res['message'] + '\n电话:' + res[
-                            'phone'] + '\n归属地:' + res['phonediqu'],
-                        client_key[str(address)],
-                        client_key[str(address)])
-                    client_socket.sendall(encrypted_message.encode())
+                    message_stack.append(
+                        '服务器' + m_constant.split_flag + '\n查询:' + qq + '\n结果:' + res['message'] + '\n电话:' +
+                        res[
+                            'phone'] + '\n归属地:' + res['phonediqu'])
                 else:
-                    encrypted_message = encryption.AESEncryptUtil.encrypt_aes(
-                        '服务器' + m_constant.split_flag + '查询失败，没有找到',
-                        client_key[str(address)],
-                        client_key[str(address)])
-                    client_socket.sendall(encrypted_message.encode())
+                    message_stack.append('服务器' + m_constant.split_flag + '查询失败，没有找到')
             # 星座查询
-            elif code[:3] == '$星座':
-                xingzuo = code.split(':',1)[1]
-                response = requests.get('https://xiaoapi.cn/API/xzys.php?msg='+xingzuo)
-                encrypted_message = encryption.AESEncryptUtil.encrypt_aes('服务器'+m_constant.split_flag+response.text,
-                                                                          client_key[str(address)],
-                                                                          client_key[str(address)])
-                client_socket.sendall(encrypted_message.encode())
-
+            elif code[:4] == '$星座:':
+                message_stack.append(decodeText)
+                message_stack.append('服务器'+m_constant.split_flag+'请稍等')
+                xingzuo = code.split(':', 1)[1]
+                response = requests.get('https://xiaoapi.cn/API/xzys.php?msg=' + xingzuo)
+                message_stack.append('服务器' + m_constant.split_flag + response.text)
             else:
                 splitText = decodeText.split(m_constant.split_flag, 1)
                 if len(splitText) > 1:
