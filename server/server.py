@@ -4,6 +4,8 @@ import threading
 import time
 import encryption
 import m_constant
+import requests
+import json
 
 SERVER_HOST = '0.0.0.0'
 pubkey = ''
@@ -53,12 +55,41 @@ def handle_client(client_socket, address):
             decodeText = encryption.AESEncryptUtil.decrypt_aes(encrypted_str=data.decode(),
                                                                key_str=client_key[str(address)],
                                                                iv_str=str(client_key[str(address)]).encode(
-                                                                   encoding='utf-8').decode())
+                                                                   encoding='utf-8').decode()).replace('：', ':')
             # 指令判断区域
-            if decodeText.split(m_constant.split_flag)[1] == '$getAll':
-                encrypted_message = encryption.AESEncryptUtil.encrypt_aes(message_history+'-------------\n', client_key[str(address)],
+            code = decodeText.split(m_constant.split_flag, 1)[1]
+            if code == '$getAll':
+                encrypted_message = encryption.AESEncryptUtil.encrypt_aes(message_history + '-------------\n',
+                                                                          client_key[str(address)],
                                                                           client_key[str(address)])
                 client_socket.sendall(encrypted_message.encode())
+            # Q绑查询
+            elif code[:4] == '$QQ:':
+                qq = code.split(':', 1)[1]
+                response = requests.get(url='https://api.xywlapi.cc/qqcx2023?qq=' + qq)
+                res = json.loads(response.text)
+                if res['status'] == 200:
+                    encrypted_message = encryption.AESEncryptUtil.encrypt_aes(
+                        '服务器' + m_constant.split_flag + '\n结果:' + res['message'] + '\n电话:' + res[
+                            'phone'] + '\n归属地:' + res['phonediqu'],
+                        client_key[str(address)],
+                        client_key[str(address)])
+                    client_socket.sendall(encrypted_message.encode())
+                else:
+                    encrypted_message = encryption.AESEncryptUtil.encrypt_aes(
+                        '服务器' + m_constant.split_flag + '查询失败，没有找到',
+                        client_key[str(address)],
+                        client_key[str(address)])
+                    client_socket.sendall(encrypted_message.encode())
+            # 星座查询
+            elif code[:3] == '$星座':
+                xingzuo = code.split(':',1)[1]
+                response = requests.get('https://xiaoapi.cn/API/xzys.php?msg='+xingzuo)
+                encrypted_message = encryption.AESEncryptUtil.encrypt_aes('服务器'+m_constant.split_flag+response.text,
+                                                                          client_key[str(address)],
+                                                                          client_key[str(address)])
+                client_socket.sendall(encrypted_message.encode())
+
             else:
                 splitText = decodeText.split(m_constant.split_flag, 1)
                 if len(splitText) > 1:
