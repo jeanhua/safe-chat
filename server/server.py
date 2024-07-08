@@ -97,15 +97,15 @@ def handle_client(client_socket, address):
                         message_history = message_history + splitText[0] + ':\n'
                     message_queue.put(decodeText)
         except ConnectionResetError:
-            print(f"从 {address} 接收数据时连接被重置")
+            print(f"{str(datetime.now())}从 {address} 接收数据时连接被重置")
             with open('log.txt', 'a', encoding='utf-8') as f:
-                f.write(f"服务器:从 {address} 接收数据时连接被重置")
+                f.write(f"{str(datetime.now())}服务器:从 {address} 接收数据时连接被重置\n")
                 f.close()
             break
         except Exception as e:
-            print(f"处理来自 {address} 的数据时发生未知错误: {e}")
+            print(f"{str(datetime.now())}处理来自 {address} 的数据时发生未知错误: {e}")
             with open('log.txt', 'a', encoding='utf-8') as f:
-                f.write(f"服务器:处理来自 {address} 的数据时发生未知错误: {e}")
+                f.write(f"{str(datetime.now())}服务器:处理来自 {address} 的数据时发生未知错误: {e}\n")
                 f.close()
             break
 
@@ -119,7 +119,7 @@ def handle_client(client_socket, address):
                 break
     except Exception as e:
         with open('log.txt', 'a', encoding='utf-8') as f:
-            f.write(f"服务器:异常错误 {str(e)}")
+            f.write(f"{str(datetime.now())}服务器:异常错误 {str(e)}\n")
             f.close()
     message_queue.put('服务器' + m_constant.split_flag + str(address) + '离开')
     client_socket.close()
