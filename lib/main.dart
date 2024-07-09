@@ -136,8 +136,8 @@ class _LoginPageState extends State<LoginPage> {
       String port = match.group(2)!;
       // 跳转到其他页面
       Navigator.of(context).pushAndRemoveUntil(
-          new MaterialPageRoute(
-              builder: (context) => new ChatPage(pushData: {
+          MaterialPageRoute(
+              builder: (context) => ChatPage(pushData: {
                     'ip': ip,
                     'port': port,
                     'nickname': _usernameController.text,

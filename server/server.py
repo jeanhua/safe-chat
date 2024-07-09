@@ -43,6 +43,7 @@ def handle_client(client_socket, address):
                     # 不正常请求，中断服务
                     del client_key[str(address)]
                     client_socket.close()
+                    break
             # 等待客户发送密钥
             elif client_key[str(address)] == '1':
                 keyText = encryption.descryption(data.decode(), prikey)
@@ -98,11 +99,13 @@ def handle_client(client_socket, address):
                     message_queue.put(decodeText)
         except ConnectionResetError:
             print(f"{str(datetime.now())}从 {address} 接收数据时连接被重置")
+            client_socket.close()
             with open('log.txt', 'a', encoding='utf-8') as f:
                 f.write(f"{str(datetime.now())}服务器:从 {address} 接收数据时连接被重置\n")
                 f.close()
             break
         except Exception as e:
+            client_socket.close()
             print(f"{str(datetime.now())}处理来自 {address} 的数据时发生未知错误: {e}")
             with open('log.txt', 'a', encoding='utf-8') as f:
                 f.write(f"{str(datetime.now())}服务器:处理来自 {address} 的数据时发生未知错误: {e}\n")
@@ -138,7 +141,7 @@ def server_send():
             # 使用正确的密钥和IV来加密消息
             encrypted_message = encryption.AESEncryptUtil.encrypt_aes(message, client_aes_key, iv)
             client_sk[client_i].sendall(encrypted_message.encode())
-        # 删除已处理的消息
+        # 日志
         with open('log.txt', 'a', encoding='utf-8') as f:
             nickname = message.split(m_constant.split_flag, 1)[0]
             msg = message.split(m_constant.split_flag, 1)[1] if len(
